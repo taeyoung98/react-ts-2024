@@ -138,7 +138,8 @@ function Coin() {
   })
   const { isLoading: tickersLoading, data: tickers } = useQuery<IPrice>({
     queryKey: ["tickers", coinId],
-    queryFn: () => fetchCoinTickers(coinId)
+    queryFn: () => fetchCoinTickers(coinId),
+    // refetchInterval: 10000
   })
   const isLoading = infoLoading || tickersLoading
 
@@ -184,8 +185,8 @@ function Coin() {
               <span>${info?.symbol}</span>
             </OverviewItem>
             <OverviewItem>
-              <span>Open Source:</span>
-              <span>{info?.open_source ? "Yes" : "No"}</span>
+              <span>Price:</span>
+              <span>{tickers?.quotes.USD.price}</span>
             </OverviewItem>
           </Overview>
           <Description>{info?.description}</Description>

@@ -19,7 +19,8 @@ interface IHistory {
 function Chart({ coinId }: ChartProps) {
   const { isLoading, data } = useQuery<IHistory[]>({
     queryKey: ["ohlcv", coinId],
-    queryFn: () => fetchCoinHistory(coinId)
+    queryFn: () => fetchCoinHistory(coinId),
+    // refetchInterval: 10000
   })
 
   return (
