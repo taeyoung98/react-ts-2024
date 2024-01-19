@@ -4,6 +4,7 @@ import Chart from "./Chart"
 import Price from "./Price"
 import { useQuery } from "@tanstack/react-query"
 import { fetchCoinInfo, fetchCoinTickers } from "../api"
+import { Helmet } from "react-helmet"
 
 const Container = styled.div`
   padding: 0 20px;
@@ -71,7 +72,8 @@ interface RouteParams {
   coinId: string
 }
 interface RouteState {
-  name: string
+  name: string,
+  symbol: string
 }
 interface IInfo {
   id: string
@@ -165,6 +167,14 @@ function Coin() {
 
   return (
     <Container>
+      {/* <head> of document */}
+      <Helmet>
+        <link rel="icon" type="image/png" href={`https://coinicons-api.vercel.app/api/icon/${state?.symbol}`} sizes="16x16" />
+        <title>
+          {state?.name ? state.name : (isLoading ? "Loading.." : info?.name)}
+        </title>
+      </Helmet>
+      
       <Header>
         <Title>
           {/* Tab 클릭시 state.name 소실 방지 */}

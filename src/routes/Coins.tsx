@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
 import { fetchCoins } from "../api"
+import { Helmet } from "react-helmet"
 
 const Container = styled.div`
   padding: 0 20px;
@@ -80,6 +81,11 @@ function Coins() {
 
   return (
     <Container>
+      {/* <head> of document */}
+      <Helmet>
+        <title>Coins</title>
+      </Helmet>
+
       <Header>
         <Title>Coins</Title>
       </Header>
@@ -90,7 +96,10 @@ function Coins() {
             <Coin key={coin.id}>
               <Link to={{
                 pathname: `/${coin.id}`,
-                state: { name: coin.name }
+                state: {
+                  name: coin.name,
+                  symbol: coin.symbol.toLowerCase()
+                }
               }}>
                 <Icon
                   src={`https://coinicons-api.vercel.app/api/icon/${coin.symbol.toLowerCase()}`} />
