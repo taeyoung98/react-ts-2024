@@ -1,6 +1,6 @@
 import { createGlobalStyle } from "styled-components"
 import Router from "./Router"
-
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 const GlobalStyle = createGlobalStyle`
 @import url('https://fonts.googleapis.com/css2?family=Lemon&family=Lilita+One&family=Montserrat:wght@300;400&display=swap');
@@ -74,6 +74,7 @@ function App() {
     <>
       <GlobalStyle />
       <Router />
+      <ReactQueryDevtools />
     </>
   )
 }

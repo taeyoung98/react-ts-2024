@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react"
+import { useQuery } from "@tanstack/react-query"
 import { Link } from "react-router-dom"
 import styled from "styled-components"
+import { fetchCoins } from "../api"
 
 const Container = styled.div`
   padding: 0 20px;
@@ -56,6 +57,14 @@ interface ICoin {
 }
 
 function Coins() {
+  // Queries
+  const { isLoading, data } = useQuery<ICoin[]>({
+    queryKey: ["allCoins"],
+    queryFn: fetchCoins,
+    select: data => data.slice(0, 100)
+  });
+
+  /* before react-query
   const [loading, setLoading] = useState(true)
   const [coins, setCoins] = useState<ICoin[]>([])
 
@@ -67,22 +76,24 @@ function Coins() {
       setLoading(false)
     })()
   }, [])
+  */
 
   return (
     <Container>
       <Header>
         <Title>Coins</Title>
       </Header>
-      {loading ?
+      {isLoading ?
         <Loader>Loading..</Loader> : (
         <CoinList>
-          {coins.map(coin => (
+          {data?.map(coin => (
             <Coin key={coin.id}>
               <Link to={{
                 pathname: `/${coin.id}`,
                 state: { name: coin.name }
               }}>
-                <Icon src={`https://coinicons-api.vercel.app/api/icon/${coin.symbol.toLowerCase()}`} />
+                <Icon
+                  src={`https://coinicons-api.vercel.app/api/icon/${coin.symbol.toLowerCase()}`} />
                 {coin.name} &rarr;
               </Link>
             </Coin>

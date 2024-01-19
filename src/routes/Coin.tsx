@@ -3,6 +3,8 @@ import { Link, Route, Switch, useLocation, useParams, useRouteMatch } from "reac
 import styled from "styled-components"
 import Chart from "./Chart"
 import Price from "./Price"
+import { useQuery } from "@tanstack/react-query"
+import { fetchCoinInfo, fetchCoinTickers } from "../api"
 
 const Container = styled.div`
   padding: 0 20px;
@@ -128,14 +130,26 @@ interface IPrice {
 }
 
 function Coin() {
-  const [loading, setLoading] = useState(true)
   const { coinId } = useParams<RouteParams>() // url의 :coinId
   const { state } = useLocation<RouteState>() // react router DOM이 보내주는 location obj <Link to={{ state: {} }} 
-  const [info, setInfo] = useState<IInfo>() 
-  const [priceInfo, setPriceInfo] = useState<IPrice>()
+
+  const { isLoading: infoLoading, data: info } = useQuery<IInfo>({
+    queryKey: ["info", coinId], // key must be unique
+    queryFn: () => fetchCoinInfo(coinId)
+  })
+  const { isLoading: tickersLoading, data: tickers } = useQuery<IPrice>({
+    queryKey: ["tickers", coinId],
+    queryFn: () => fetchCoinTickers(coinId)
+  })
+  const isLoading = infoLoading || tickersLoading
+
   const chartMatch = useRouteMatch("/:coinId/chart") // 현재 주소와 입력 주소 일치 여부
   const priceMatch = useRouteMatch("/:coinId/price")
-
+  
+  /* before react-query
+  const [loading, setLoading] = useState(true)
+  const [info, setInfo] = useState<IInfo>() 
+  const [priceInfo, setPriceInfo] = useState<IPrice>()
 
   useEffect(() => {
     (async () => {
@@ -147,17 +161,18 @@ function Coin() {
       setLoading(false)
     })()
   }, [coinId])
+  */
 
   return (
     <Container>
       <Header>
         <Title>
           {/* Tab 클릭시 state.name 소실 방지 */}
-          {state?.name ? state.name : (loading ? "Loading.." : info?.name)}
+          {state?.name ? state.name : (isLoading ? "Loading.." : info?.name)}
         </Title>
       </Header>
 
-     {loading ?
+     {isLoading ?
         <Loader>Loading..</Loader> :
         <>
           <Overview>
@@ -178,11 +193,11 @@ function Coin() {
           <Overview>
             <OverviewItem>
               <span>Total Supply:</span>
-              <span>{priceInfo?.total_supply}</span>
+              <span>{tickers?.total_supply}</span>
             </OverviewItem>
             <OverviewItem>
               <span>Max Supply:</span>
-              <span>{priceInfo?.max_supply}</span>
+              <span>{tickers?.max_supply}</span>
             </OverviewItem>
           </Overview>
 
