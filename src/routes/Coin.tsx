@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Route, Switch, useLocation, useParams } from "react-router-dom"
+import { Link, Route, Switch, useLocation, useParams, useRouteMatch } from "react-router-dom"
 import styled from "styled-components"
 import Chart from "./Chart"
 import Price from "./Price"
@@ -45,6 +45,26 @@ const Description = styled.p`
   margin: 20px 0px;
   line-height: 1.3
 `
+const Tabs = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  margin: 25px 0px;
+  gap: 10px;
+`
+const Tab = styled.span<{ $isActive: boolean }>`
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 400;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 7px 0px;
+  border-radius: 10px;
+  color: ${props => props.$isActive ? props.theme.accentColor : props.theme.textColor};
+    
+  a {
+    display: block;
+  }
+`
 
 interface RouteParams {
   coinId: string
@@ -58,7 +78,7 @@ interface IInfo {
   symbol: string
   rank: number
   is_new: boolean
-  is_active: boolean
+  $isActive: boolean
   type: string
   logo: string
   description: string
@@ -109,10 +129,13 @@ interface IPrice {
 
 function Coin() {
   const [loading, setLoading] = useState(true)
-  const { coinId } = useParams<RouteParams>()
+  const { coinId } = useParams<RouteParams>() // url의 :coinId
   const { state } = useLocation<RouteState>() // react router DOM이 보내주는 location obj <Link to={{ state: {} }} 
-  const [info, setInfo] = useState<IInfo>()
+  const [info, setInfo] = useState<IInfo>() 
   const [priceInfo, setPriceInfo] = useState<IPrice>()
+  const chartMatch = useRouteMatch("/:coinId/chart") // 현재 주소와 입력 주소 일치 여부
+  const priceMatch = useRouteMatch("/:coinId/price")
+
 
   useEffect(() => {
     (async () => {
@@ -128,9 +151,12 @@ function Coin() {
   return (
     <Container>
       <Header>
-        <Title>{state?.name || "Loading.."}</Title>
+        <Title>
+          {/* Tab 클릭시 state.name 소실 방지 */}
+          {state?.name ? state.name : (loading ? "Loading.." : info?.name)}
+        </Title>
       </Header>
-      
+
      {loading ?
         <Loader>Loading..</Loader> :
         <>
@@ -160,11 +186,20 @@ function Coin() {
             </OverviewItem>
           </Overview>
 
+          <Tabs>
+            <Tab $isActive={chartMatch !== null}>
+              <Link to={`/${coinId}/chart`}>Chart</Link>
+            </Tab>
+            <Tab $isActive={priceMatch !== null}>
+              <Link to={`/${coinId}/price`}>Price</Link>
+            </Tab>
+          </Tabs>
+
           <Switch>
-            <Route path={`/${coinId}/chart`}>
+            <Route path={`/:coinId/chart`}>
               <Chart />
             </Route>
-            <Route path={`/${coinId}/price`}>
+            <Route path={`/:coinId/price`}>
               <Price />
             </Route>
           </Switch>
