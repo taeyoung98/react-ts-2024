@@ -3,6 +3,8 @@ import { Link } from "react-router-dom"
 import styled from "styled-components"
 import { fetchCoins } from "../api"
 import { Helmet } from "react-helmet"
+import { useSetRecoilState } from "recoil"
+import { isDarkAtom } from "../atom"
 
 const Container = styled.div`
   padding: 0 20px;
@@ -17,7 +19,7 @@ const Header = styled.header`
 `
 const Title = styled.h1`
   font-size: 48px;
-  color: ${props => props.theme.textColor};
+  color: ${(props) => props.theme.textColor};
 `
 const Loader = styled.div`
   text-align: center;
@@ -25,19 +27,18 @@ const Loader = styled.div`
 const CoinList = styled.ul``
 const Coin = styled.li`
   background-color: whitesmoke;
-  color: ${props => props.theme.bgColor};
+  color: ${(props) => props.theme.bgColor};
   border-radius: 15px;
   margin-bottom: 10px;
 
   a {
     padding: 20px; // 텍스트 외부에서도 클릭할 수 있게
-    display: flex; 
+    display: flex;
     align-items: center;
     transition: color 0.2s ease-in;
 
-
     &:hover {
-      color: ${props => props.theme.accentColor};
+      color: ${(props) => props.theme.accentColor};
     }
   }
 `
@@ -48,22 +49,25 @@ const Icon = styled.img`
 `
 
 interface ICoin {
-  id: string,
-  name: string,
-  symbol: string,
-  rank: number,
-  is_new: boolean,
-  is_active: boolean,
+  id: string
+  name: string
+  symbol: string
+  rank: number
+  is_new: boolean
+  is_active: boolean
   type: string
 }
 
 function Coins() {
+  const setIsDark = useSetRecoilState(isDarkAtom)
+  const toggleIsDark = () => setIsDark((prev) => !prev)
+
   // Queries
   const { isLoading, data } = useQuery<ICoin[]>({
     queryKey: ["allCoins"],
     queryFn: fetchCoins,
-    select: data => data.slice(0, 100)
-  });
+    select: (data) => data.slice(0, 100),
+  })
 
   /* before react-query
   const [loading, setLoading] = useState(true)
@@ -88,21 +92,26 @@ function Coins() {
 
       <Header>
         <Title>Coins</Title>
+        <button onClick={toggleIsDark}>Toggle Mode</button>
       </Header>
-      {isLoading ?
-        <Loader>Loading..</Loader> : (
+      {isLoading ? (
+        <Loader>Loading..</Loader>
+      ) : (
         <CoinList>
-          {data?.map(coin => (
+          {data?.map((coin) => (
             <Coin key={coin.id}>
-              <Link to={{
-                pathname: `/${coin.id}`,
-                state: {
-                  name: coin.name,
-                  symbol: coin.symbol.toLowerCase()
-                }
-              }}>
+              <Link
+                to={{
+                  pathname: `/${coin.id}`,
+                  state: {
+                    name: coin.name,
+                    symbol: coin.symbol.toLowerCase(),
+                  },
+                }}
+              >
                 <Icon
-                  src={`https://coinicons-api.vercel.app/api/icon/${coin.symbol.toLowerCase()}`} />
+                  src={`https://coinicons-api.vercel.app/api/icon/${coin.symbol.toLowerCase()}`}
+                />
                 {coin.name} &rarr;
               </Link>
             </Coin>
